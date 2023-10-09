@@ -1,25 +1,26 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import axios from 'axios';
+import React, { useEffect } from 'react';
+import { Button, Form, Input } from 'antd';
+import HeavyTask from './components/HeavyTask';
+import History from './components/HistoryPage';
 
-function App() {
+const { TextArea } = Input;
+
+const App = () => {
+
+  useEffect(() => {
+    axios.get('https://localhost:7173/api/HeavyTask')
+    .then((response) => {
+      console.log(response.data);
+    });
+  })
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <HeavyTask/>
+      <History/>
+    </>
   );
 }
 

@@ -2,6 +2,7 @@
 using AppServer.Data;
 using AppServer.Models.Domains;
 using AppServer.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppServer.Controllers
 {
@@ -16,18 +17,18 @@ namespace AppServer.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllCards()
+        public async Task<ActionResult> GetAllCards()
         {
-            var tasks = dbContext.HeavyTasks.ToList();
+            var tasks = await dbContext.HeavyTasks.ToListAsync();
 
             return Ok(tasks);
         }
 
         [HttpGet]
         [Route("{id:Guid}")]
-        public IActionResult GetCard(Guid id)
+        public async Task<ActionResult> GetCard(Guid id)
         {
-            var task = dbContext.HeavyTasks.Find(id);
+            var task = await dbContext.HeavyTasks.FindAsync(id);
 
             if (task == null)
             {
@@ -40,7 +41,7 @@ namespace AppServer.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddTaskCard([FromBody] HeavyTaskDTO createdTask)
+        public async Task<ActionResult> AddTaskCard([FromBody] HeavyTaskDTO createdTask)
         {
             var taskDomain = new HeavyTask
             {
@@ -54,15 +55,15 @@ namespace AppServer.Controllers
             };
 
             dbContext.HeavyTasks.Add(taskDomain);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetCard), new { id = taskDomain.id }, taskDomain);
         }
         [HttpDelete]
         [Route("{id:Guid}")]
-        public IActionResult DeleteCard(Guid id)
+        public async Task<ActionResult> DeleteCard(Guid id)
         {
-            var task = dbContext.HeavyTasks.Find(id);
+            var task = await dbContext.HeavyTasks.FindAsync(id);
 
             if (task == null)
             {
@@ -71,7 +72,7 @@ namespace AppServer.Controllers
             else
             {
                 dbContext.HeavyTasks.Remove(task);
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
                 return Ok(task);
             }
         }
