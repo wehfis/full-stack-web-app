@@ -12,13 +12,36 @@ code {
     monospace;
 }
 
+.container {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+}
+
 .input-block {
+  gap: 3rem;
+  width: 60%;
+}
+
+.history-block {
+  margin: 50px;
+  width: 60%;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
-  margin: auto;
-  width: 50%;
-  position: absolute;
-  top: 10%;
-  left: 25%;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.history-block-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-self: flex-start;
+}
+
+.history-text {
+  font-weight: 500;
+  font-size: xx-large;
 }

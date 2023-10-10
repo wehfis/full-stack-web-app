@@ -1,28 +1,32 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppServer.Models.Domains
 {
     public partial class HeavyTask
     {
-        public Guid id { get; set; }
+        public HeavyTask() : base() { }
+        public Guid Id { get; set; }
 
         [StringLength(50, ErrorMessage = "Name length can't be more than 50 symbols.")]
-        public string name { get; set; }
+        public string Name { get; set; }
 
         [StringLength(10000, ErrorMessage = "Description length can't be more than 10000 symbols.")]
-        public string description { get; set; }
+        public string Description { get; set; }
 
         [StringLength(1000, ErrorMessage = "Result length can't be more than 1000 symbols.")]
-        public string? result { get; set; }
-        public DateTime startedAt{ get; set; }
-        public DateTime? finishedAt { get; set;}
+        public string? Result { get; set; }
+        public DateTime StartedAt{ get; set; }
+        public DateTime? FinishedAt { get; set;}
 
         [Required]
         [Range(0,100)]
         [DefaultValue(0)]
-        public uint percentageDone { get; set; }
+        public uint PercentageDone { get; set; }
+        [ForeignKey("OwnerId")]
+        public Guid OwnerId { get; set; }
+        public User Owner { get; set; }
 
     }
 }

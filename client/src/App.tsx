@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form, Input } from 'antd';
 import HeavyTask from './components/HeavyTask';
 import History from './components/HistoryPage';
@@ -7,20 +7,27 @@ import History from './components/HistoryPage';
 const { TextArea } = Input;
 
 const App = () => {
+  const [isHistoryButtonClicked, setIsHistoryButtonClicked] = useState(false);
 
   useEffect(() => {
-    axios.get('https://localhost:7173/api/HeavyTask')
-    .then((response) => {
-      console.log(response.data);
-    });
+    // axios.get('https://localhost:7173/api/HeavyTask')
+    // .then((response) => {
+    //   console.log(response.data);
+    // });
   })
+
+  const updatePage = (value: boolean) => {
+    setIsHistoryButtonClicked(value);
+  };
 
 
   return (
-    <>
-      <HeavyTask/>
-      <History/>
-    </>
+    <div className='container'>
+      <History isBtnClicked = {updatePage}/>
+      {!isHistoryButtonClicked &&
+       <HeavyTask/>
+      }
+    </div>
   );
 }
 

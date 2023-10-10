@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppServer.Migrations
 {
     [DbContext(typeof(AppServerDbContext))]
-    [Migration("20231006102446_ThirdUpdateModel")]
-    partial class ThirdUpdateModel
+    [Migration("20231010192441_createdUserModel")]
+    partial class createdUserModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,6 +57,26 @@ namespace AppServer.Migrations
                     b.HasKey("id");
 
                     b.ToTable("HeavyTasks");
+                });
+
+            modelBuilder.Entity("AppServer.Models.Domains.User", b =>
+                {
+                    b.Property<Guid>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("hashedPassword")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

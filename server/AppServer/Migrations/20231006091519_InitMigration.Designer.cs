@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AppServer.Migrations
 {
-    [DbContext(typeof(HeavyTaskDbContext))]
+    [DbContext(typeof(AppServerDbContext))]
     [Migration("20231006091519_InitMigration")]
     partial class InitMigration
     {

@@ -3,15 +3,18 @@ using AppServer.Data;
 using AppServer.Models.Domains;
 using AppServer.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AppServer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("task/[controller]")]
     [ApiController]
+    [Authorize]
     public class HeavyTaskController : Controller
     {
-        private readonly HeavyTaskDbContext dbContext;
-        public HeavyTaskController(HeavyTaskDbContext dbContext)
+        private readonly AppServerDbContext dbContext;
+        public HeavyTaskController(AppServerDbContext dbContext)
         { 
             this.dbContext = dbContext;
         }
@@ -19,6 +22,7 @@ namespace AppServer.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAllCards()
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var tasks = await dbContext.HeavyTasks.ToListAsync();
 
             return Ok(tasks);
@@ -45,19 +49,16 @@ namespace AppServer.Controllers
         {
             var taskDomain = new HeavyTask
             {
-                id = createdTask.id,
-                name = createdTask.name,
-                description = createdTask.description,
-                result = createdTask.result,
-                startedAt = createdTask.startedAt,
-                finishedAt = createdTask.finishedAt,
-                percentageDone = createdTask.percentageDone
+                Id = createdTask.Id,
+                Name = createdTask.Name,
+                Description = createdTask.Description,
+                StartedAt = DateTime.Now
             };
 
             dbContext.HeavyTasks.Add(taskDomain);
             await dbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCard), new { id = taskDomain.id }, taskDomain);
+            return CreatedAtAction(nameof(GetCard), new { Id = taskDomain.Id }, taskDomain);
         }
         [HttpDelete]
         [Route("{id:Guid}")]
