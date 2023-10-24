@@ -22,17 +22,27 @@ namespace AppServer.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAllCards()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var tasks = await dbContext.HeavyTasks.ToListAsync();
 
             return Ok(tasks);
         }
 
         [HttpGet]
-        [Route("{id:Guid}")]
-        public async Task<ActionResult> GetCard(Guid id)
+        [Route("GetSpecUser/{userId:Guid}")]
+        public async Task<ActionResult> GetAllCards(Guid userId)
         {
-            var task = await dbContext.HeavyTasks.FindAsync(id);
+            var tasks = await dbContext.HeavyTasks
+                .Where(task => task.OwnerId == userId)
+                .ToListAsync();
+
+            return Ok(tasks);
+        }
+
+        [HttpGet]
+        [Route("{Id:Guid}")]
+        public async Task<ActionResult> GetCard(Guid Id)
+        {
+            var task = await dbContext.HeavyTasks.FindAsync(Id);
 
             if (task == null)
             {
@@ -47,18 +57,20 @@ namespace AppServer.Controllers
         [HttpPost]
         public async Task<ActionResult> AddTaskCard([FromBody] HeavyTaskDTO createdTask)
         {
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == createdTask.OwnerId);
             var taskDomain = new HeavyTask
             {
                 Id = createdTask.Id,
                 Name = createdTask.Name,
                 Description = createdTask.Description,
-                StartedAt = DateTime.Now
+                StartedAt = DateTime.Now,
+                OwnerId = createdTask.OwnerId
             };
 
             dbContext.HeavyTasks.Add(taskDomain);
             await dbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCard), new { Id = taskDomain.Id }, taskDomain);
+            return CreatedAtAction(nameof(GetCard),new {Id = createdTask.Id }, taskDomain);
         }
         [HttpDelete]
         [Route("{id:Guid}")]

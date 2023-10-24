@@ -1,6 +1,11 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Form, Input } from 'antd';
+import { authURL, taskURL } from '../endpoint';
+import TokenStore from '../store/TokenStore';
+import { Context } from '../index'
+import { observer } from 'mobx-react-lite'
+import TaskDTO from '../DTOs/taskDTO'
 
 const { TextArea } = Input;
 
@@ -14,23 +19,47 @@ function generate_uuidv4() {
 
 const HeavyTask = () => {
   const [taskName, setTaskName] = useState('');
+  const [userId, setUserId] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [isClicked, setisClicked] = useState(false);
+  const { tokenStore } = useContext(Context);
 
-  const handle_post = () => {
+  const handle_post = async () => {
     if (taskName && taskDescription) {
-      setisClicked(true);
-      axios.post('https://localhost:7173/api/HeavyTask', {
-        "id": generate_uuidv4(),
-        "name": taskName,
-        "description": taskDescription
-      })
+      axios.get(`${authURL}/${tokenStore.email}`, {
+        headers: {
+          'Authorization': `Bearer ${tokenStore.token}`,
+        }
+      }).then(
+        (response) => {
+          setUserId(response.data.id);
+        }
+      )
+      const newTask: TaskDTO = {
+        id: generate_uuidv4(),
+        name: taskName,
+        description: taskDescription,
+        ownerId: userId
+      }
+      const axiosConfig = {
+        method: 'post',
+        url: `${taskURL}`,
+        data: newTask,
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${tokenStore.token}`,
+        }
+      };
+      await axios(axiosConfig)
         .then(function (response) {
           console.log(response);
         })
         .catch(function (error) {
+          console.log("sadld");
+          console.log(error.data);
           console.log(error);
         });
+
     }
     else if (!(taskName && taskDescription)) {
       console.log("Task Name and Task Descriprion Should be setted");
@@ -43,7 +72,9 @@ const HeavyTask = () => {
   return (
     <>
       <div className='input-block'>
+        <p className='general-text'>WELCOME!</p>
         <p>Input your task here:</p>
+        <br />
         <Form
           name="wrap"
           labelCol={{ flex: '150px' }}
@@ -62,13 +93,13 @@ const HeavyTask = () => {
           </Form.Item>
 
           <Form.Item label=" ">
-          {!isClicked &&
-            <Button type="primary" htmlType="submit" onClick={handle_post}>
-              Submit
-            </Button>
+            {!isClicked &&
+              <Button type="primary" htmlType="submit" onClick={handle_post}>
+                Submit
+              </Button>
             }
             {isClicked &&
-              <Button  type="primary" loading={isClicked}>
+              <Button type="primary" loading={isClicked}>
                 Calculation
               </Button>
             }
@@ -80,4 +111,4 @@ const HeavyTask = () => {
   );
 }
 
-export default HeavyTask;
+export default observer(HeavyTask);

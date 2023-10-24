@@ -20,9 +20,10 @@ namespace AppServer.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
-                .HasMany(p => p.HeavyTasks)
-                .WithOne(c => c.Owner)
-                .HasForeignKey(c => c.OwnerId);
+                .HasMany(e => e.HeavyTasks)
+                .WithOne()
+                .HasForeignKey(e => e.OwnerId)
+                .IsRequired();
         }
     }
 }

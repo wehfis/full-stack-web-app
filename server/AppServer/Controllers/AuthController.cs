@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,10 +21,13 @@ namespace AppServer.Controllers
     {
         private readonly AppServerDbContext dbContext;
         private readonly IConfiguration _configuration;
+        //private readonly IHttpContextAccessor _httpContextAccessor;
+        public static List<string> InvalidTokens = new List<string>();
         public AuthController(AppServerDbContext dbContext, IConfiguration configuration)
         {
             this.dbContext = dbContext;
             _configuration = configuration;
+            //_httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]
@@ -34,12 +38,12 @@ namespace AppServer.Controllers
             return Ok(users);
         }
 
-        [HttpGet]
-        [Route("{id:Guid}")]
-        public async Task<ActionResult> GetUser(Guid id)
+        [HttpGet("{Email}")]
+        public async Task<ActionResult> GetUserByEmail(string Email)
         {
-            var user = await dbContext.Users.FindAsync(id);
-
+            var user = await dbContext.Users
+             .Where(u => u.Email == Email)
+             .FirstOrDefaultAsync();
             if (user == null)
             {
                 return NotFound();
@@ -49,40 +53,51 @@ namespace AppServer.Controllers
                 return Ok(user);
             }
         }
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        public async Task<ActionResult> DeleteUser(Guid id)
+        {
+            var user = await dbContext.Users.FindAsync(id);
+            if (user == null) { return BadRequest("This user isn't exist"); }
+            dbContext.Users.Remove(user);
+            dbContext.SaveChanges();
+            return Ok($"user {user.Email} is removed");
+        }
 
         [HttpPost("register")]
         [AllowAnonymous]
         public async Task<ActionResult> Register([FromBody] UserDTO newUser)
         {
-            var existingUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Name == newUser.Name);
-            if (existingUser != null)
-            { 
-                return BadRequest("User with this name already exists.");
-            }
-            var user = await dbContext.Users.FindAsync(newUser.Id);
+            var user = await dbContext.Users
+                .Where(u => u.Email == newUser.Email)
+                .FirstOrDefaultAsync();
+
             if (user != null)
             {
-                return BadRequest("User with this name already exists.");
+                return BadRequest("User with this email already exists.");
             }
             string hashedPassword = HashOriginPassword(newUser.Password);
             var userDTO = new User
             {
-                Id = newUser.Id,
-                Name = newUser.Name,
-                Password = hashedPassword
+                Email = newUser.Email,
+                Password = hashedPassword,
+                isAdmin = false
             };
 
             dbContext.Users.Add(userDTO);
             await dbContext.SaveChangesAsync();
 
             string token = CreateToken(newUser);
+
             return Ok(token);
         }
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<ActionResult> Login([FromBody] UserDTO user)
         {
-            var existedUser = await dbContext.Users.FindAsync(user.Id);
+            var existedUser = await dbContext.Users
+                .Where(u => u.Email == user.Email)
+                .FirstOrDefaultAsync();
             if (existedUser == null)
             {
                 return BadRequest("User doesn't exist");
@@ -93,13 +108,8 @@ namespace AppServer.Controllers
                 return BadRequest("Incorrect password");
             }
             string token = CreateToken(user);
-            return Ok(token);
-        }
 
-        [HttpPost("logout")]
-        public async Task<ActionResult> Logout([FromBody] UserDTO newUser)
-        {
-            return Ok("Logged out successfully");
+            return Ok(token);
         }
         private string HashOriginPassword(string originalPassword)
         {
@@ -122,7 +132,7 @@ namespace AppServer.Controllers
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Name)
+                new Claim(ClaimTypes.Email, user.Email)
             };
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

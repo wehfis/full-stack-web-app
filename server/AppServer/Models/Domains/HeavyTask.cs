@@ -6,7 +6,6 @@ namespace AppServer.Models.Domains
 {
     public partial class HeavyTask
     {
-        public HeavyTask() : base() { }
         public Guid Id { get; set; }
 
         [StringLength(50, ErrorMessage = "Name length can't be more than 50 symbols.")]
@@ -26,7 +25,6 @@ namespace AppServer.Models.Domains
         public uint PercentageDone { get; set; }
         [ForeignKey("OwnerId")]
         public Guid OwnerId { get; set; }
-        public User Owner { get; set; }
 
     }
 }

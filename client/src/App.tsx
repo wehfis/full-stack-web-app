@@ -1,13 +1,17 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Form, Input } from 'antd';
-import HeavyTask from './components/HeavyTask';
-import History from './components/HistoryPage';
+import Login from './pages/LoginPage';
+import Register from './pages/RegisterPage';
+import Home from './pages/HomePage';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Context } from './index';
 
 const { TextArea } = Input;
 
 const App = () => {
   const [isHistoryButtonClicked, setIsHistoryButtonClicked] = useState(false);
+  const { tokenStore } = useContext(Context);
 
   useEffect(() => {
     // axios.get('https://localhost:7173/api/HeavyTask')
@@ -20,14 +24,14 @@ const App = () => {
     setIsHistoryButtonClicked(value);
   };
 
-
   return (
-    <div className='container'>
-      <History isBtnClicked = {updatePage}/>
-      {!isHistoryButtonClicked &&
-       <HeavyTask/>
-      }
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" Component={Register}/>
+        <Route path="/home" Component={Home}/>
+        <Route path="/login" Component={Login}/>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

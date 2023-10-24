@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace AppServer.Extensions
 {
@@ -17,7 +18,7 @@ namespace AppServer.Extensions
                 var front_url = configuration.GetValue<string>("front_url");
                 options.AddDefaultPolicy(policy =>
                 {
-                    policy.WithOrigins(front_url).AllowAnyMethod().AllowAnyHeader();
+                    policy.WithOrigins(front_url).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
             });
             services.AddAuthentication(options =>
@@ -39,6 +40,8 @@ namespace AppServer.Extensions
                     ValidateIssuerSigningKey = true
                 };
             });
+            services.AddControllers().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
         }
     }
 }

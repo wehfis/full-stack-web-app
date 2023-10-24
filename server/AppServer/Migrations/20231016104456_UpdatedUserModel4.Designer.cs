@@ -4,6 +4,7 @@ using AppServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppServer.Migrations
 {
     [DbContext(typeof(AppServerDbContext))]
-    partial class HeavyTaskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231016104456_UpdatedUserModel4")]
+    partial class UpdatedUserModel4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,16 +84,21 @@ namespace AppServer.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
             modelBuilder.Entity("AppServer.Models.Domains.HeavyTask", b =>
                 {
-                    b.HasOne("AppServer.Models.Domains.User", null)
+                    b.HasOne("AppServer.Models.Domains.User", "Owner")
                         .WithMany("HeavyTasks")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("AppServer.Models.Domains.User", b =>
