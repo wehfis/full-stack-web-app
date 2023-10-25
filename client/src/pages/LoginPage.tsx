@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Form, Input, Modal } from 'antd';
+import { Button, Form, Input, Modal, message } from 'antd';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { authURL } from '../endpoint'
@@ -26,18 +26,22 @@ const Login = () => {
             data: newUser,
             withCredentials: true,
         };
-        await axios(axiosConfig)
-            .then(response => {
-                tokenStore.setToken(response.data, email);
-            })
-            .catch(err => {
-                if (err.response)
-                  setErrorMessage(err.response.data);
-                else 
-                  setErrorMessage(err.message);
-  
-                setIsModalErrorOpen(true);
-            });
+        try {
+            await axios(axiosConfig)
+                .then(response => {
+                    tokenStore.setToken(response.data, email);
+                })
+                .catch(err => {
+                    if (err.response)
+                        setErrorMessage(err.response.data);
+                    else
+                        setErrorMessage(err.message);
+
+                    setIsModalErrorOpen(true);
+                });
+        } catch {
+            message.error("error", 5);
+        }
     };
 
     const isValidEmail = (email: string) => {
@@ -50,7 +54,7 @@ const Login = () => {
     };
 
     if (tokenStore.isValid()) {
-        return <Navigate replace to="/home"/>
+        return <Navigate replace to="/home" />
     }
 
     return (

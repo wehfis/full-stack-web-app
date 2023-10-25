@@ -6,6 +6,8 @@ import TokenStore from '../store/TokenStore';
 import { Context } from '../index'
 import { observer } from 'mobx-react-lite'
 import TaskDTO from '../DTOs/taskDTO'
+import { message } from 'antd';
+import TaskModel from '../models/TaskModel';
 
 const { TextArea } = Input;
 
@@ -20,46 +22,104 @@ function generate_uuidv4() {
 const HeavyTask = () => {
   const [taskName, setTaskName] = useState('');
   const [userId, setUserId] = useState('');
+  const [taskId, setTaskId] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
-  const [isClicked, setisClicked] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+  const [percentageDone, setPercentageDone] = useState(0);
   const { tokenStore } = useContext(Context);
+  const [form] = Form.useForm();
 
-  const handle_post = async () => {
-    if (taskName && taskDescription) {
-      axios.get(`${authURL}/${tokenStore.email}`, {
+  const preloadData = async () => {
+    try {
+      await axios.get(`${authURL}/${tokenStore.email}`, {
         headers: {
           'Authorization': `Bearer ${tokenStore.token}`,
         }
       }).then(
         (response) => {
-          setUserId(response.data.id);
+          const tmpUserId = response.data.id;
+          setUserId(tmpUserId);
         }
       )
+    } catch {
+      message.error("error", 5);
+    }
+  }
+
+  const getTaskStatus = async () => {
+    try {
+      if (isClicked) {
+        const axiosConfig = {
+          method: 'get',
+          url: `${taskURL}/${taskId}`,
+          headers: {
+            'Authorization': `Bearer ${tokenStore.token}`,
+          }
+        };
+        await axios(axiosConfig)
+          .then(function (response) {
+            const percentages = response.data["percentageDone"];
+            setPercentageDone(percentages);
+            if (percentages === 100) {
+              setIsClicked(false);
+              setPercentageDone(0);
+              message.success('Task successfully finished', 5);
+            }
+          })
+          .catch(error => {
+            message.error("error", 5)
+            setIsClicked(false);
+            setPercentageDone(0);
+          });
+      }
+    } catch {
+      message.error("error", 5)
+    }
+  }
+
+  useEffect(() => {
+    let interval: any;
+    preloadData();
+    if (isClicked) { interval = setInterval(getTaskStatus, 1000); }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isClicked])
+  const handle_post = async () => {
+    if (taskName && taskDescription) {
       const newTask: TaskDTO = {
         id: generate_uuidv4(),
         name: taskName,
         description: taskDescription,
         ownerId: userId
       }
+      setTaskId(newTask.id);
       const axiosConfig = {
         method: 'post',
         url: `${taskURL}`,
         data: newTask,
-        withCredentials: true,
         headers: {
           'Authorization': `Bearer ${tokenStore.token}`,
         }
       };
-      await axios(axiosConfig)
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (error) {
-          console.log("sadld");
-          console.log(error.data);
-          console.log(error);
-        });
-
+      try {
+        await axios(axiosConfig)
+          .then(function (response) {
+            setIsClicked(true);
+            setTaskName('');
+            setTaskDescription('');
+            form.resetFields();
+            message.success('Task successfully created', 5);
+          })
+          .catch(function (error) {
+            message.error("error", 5)
+            setIsClicked(false);
+            setPercentageDone(0);
+          });
+      } catch {
+        message.error("error", 5);
+      }
     }
     else if (!(taskName && taskDescription)) {
       console.log("Task Name and Task Descriprion Should be setted");
@@ -83,24 +143,27 @@ const HeavyTask = () => {
           wrapperCol={{ flex: 1 }}
           colon={false}
           style={{ maxWidth: 600 }}
+          form={form}
+          onFinish={handle_post}
         >
           <Form.Item label="Task Name" name="name" rules={[{ required: true }]}>
-            <Input name='Task Name' showCount maxLength={50} onChange={(e) => setTaskName(e.target.value)} />
+            <Input name='Task Name' showCount maxLength={50} value={taskName} onChange={(e) => setTaskName(e.target.value)} />
           </Form.Item>
 
           <Form.Item label="Task Description" name="description" rules={[{ required: true }]}>
-            <TextArea showCount maxLength={10000} onChange={(e) => setTaskDescription(e.target.value)} />
+            <TextArea showCount maxLength={10000} value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)} />
           </Form.Item>
 
           <Form.Item label=" ">
             {!isClicked &&
-              <Button type="primary" htmlType="submit" onClick={handle_post}>
+              <Button type="primary" htmlType="submit">
                 Submit
               </Button>
             }
             {isClicked &&
               <Button type="primary" loading={isClicked}>
-                Calculation
+                {/* {percentageDone == 100 setIsClicked(false)} */}
+                Calculation In Proccess the {percentageDone}% is done...
               </Button>
             }
           </Form.Item>

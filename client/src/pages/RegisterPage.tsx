@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Button, Form, Input, Modal } from 'antd';
+import { Button, Form, Input, Modal, message } from 'antd';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { authURL } from '../endpoint';
@@ -26,21 +26,26 @@ const Register = () => {
             data: newUser,
             withCredentials: true,
         };
-        await axios(axiosConfig)
-            .then(response => {
-                tokenStore.setToken(response.data, email);
-            })
-            .catch(err => {
-                if (err.response)
-                    setErrorMessage(err.response.data);
-                else if (err.request)
-                    setErrorMessage(err.request.data)
-                else
-                    setErrorMessage(err.message);
+        try {
+            await axios(axiosConfig)
+                .then(response => {
+                    tokenStore.setToken(response.data, email);
+                })
+                .catch(err => {
+                    if (err.response)
+                        setErrorMessage(err.response.data);
+                    else if (err.request)
+                        setErrorMessage(err.request.data)
+                    else
+                        setErrorMessage(err.message);
 
-                setIsModalErrorOpen(true);
-            });
+                    setIsModalErrorOpen(true);
+                });
+        } catch {
+            message.error("error", 5);
+        }
     }
+
     const isValidEmail = (email: string) => {
         const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
         return emailRegex.test(email);
