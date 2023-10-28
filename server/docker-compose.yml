@@ -1,0 +1,32 @@
+version: '3.4'
+
+networks:
+    dotnetapp:
+
+services:
+  appserverdb:
+    container_name: app-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+        - 8002:1433
+    environment:
+        - ACCEPT_EULA=Y
+        - MSSQL_SA_PASSWORD=superStrongPassword123!?!
+    networks:
+        - dotnetapp
+  appserver.webapi:
+    container_name: dot-net-app
+    image: ${DOCKER_REGISTRY-}appserverwebapi
+    build:
+        context: .
+        dockerfile: AppServer.WebApi/Dockerfile
+    ports:
+        - 8001:80
+    depends_on:
+        - appserverdb
+    environment:
+        - DB_HOST=appserverdb
+        - DB_NAME=AppServerDb
+        - MSSQL_SA_PASSWORD=superStrongPassword123!?!
+    networks:
+        - dotnetapp

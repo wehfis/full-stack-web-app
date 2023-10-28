@@ -24,11 +24,18 @@ namespace AppServer.BLL.Extensions.Services
                     policy.WithOrigins(front_url).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
             });
+            var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+            var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+            var dbPassword = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
+            //var dbID = Environment.GetEnvironmentVariable("MSSQL_PID");
+            //var connection_string = $"Data Source={dbHost};Initial Catalog={dbName};User ID=sa;Password={dbPassword};TrustServerCertificate=True;MultiSubnetFailover=True";
+            //var connection_string = configuration.GetConnectionString("connection_string")
+            var connection_string = configuration.GetConnectionString("docker_connection_string");
             services.AddHangfire(config => config
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UseSqlServerStorage(configuration.GetConnectionString("connection_string")));
+                .UseSqlServerStorage(connection_string));
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

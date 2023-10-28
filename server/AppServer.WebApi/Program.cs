@@ -41,7 +41,6 @@ builder.Services.AddSwaggerGen(opt =>
 
 var app = builder.Build();
 
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
