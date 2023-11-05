@@ -19,18 +19,16 @@ namespace AppServer.BLL.Extensions.Services
             services.AddCors(options =>
             {
                 var front_url = configuration.GetValue<string>("front_url");
+                var webserver = configuration.GetValue<string>("web_server");
                 options.AddDefaultPolicy(policy =>
                 {
                     policy.WithOrigins(front_url).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                    policy.WithOrigins(webserver).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
             });
-            var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
-            var dbName = Environment.GetEnvironmentVariable("DB_NAME");
-            var dbPassword = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
-            //var dbID = Environment.GetEnvironmentVariable("MSSQL_PID");
-            //var connection_string = $"Data Source={dbHost};Initial Catalog={dbName};User ID=sa;Password={dbPassword};TrustServerCertificate=True;MultiSubnetFailover=True";
-            //var connection_string = configuration.GetConnectionString("connection_string")
-            var connection_string = configuration.GetConnectionString("docker_connection_string");
+
+            var connection_string = configuration.GetConnectionString("connection_string");
+            //var connection_string = configuration.GetConnectionString("docker_connection_string");
             services.AddHangfire(config => config
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()

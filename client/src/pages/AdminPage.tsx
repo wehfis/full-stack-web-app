@@ -79,6 +79,20 @@ const Admin = () => {
             Back to Tasks
           </Button>
         </Link>
+        <div>
+        <Link to="https://localhost:7173/hangfire">
+          <Button type="primary" htmlType="submit">
+            Dashboard 1 
+          </Button>
+        </Link>
+        <br/>
+        <br/>
+        <Link to="https://localhost:7175/hangfire">
+          <Button type="primary" htmlType="submit">
+            Dashboard 2 
+          </Button>
+        </Link>
+        </div>
       </div>
       <div className='history-block-info'>
         <p className='history-text'>Users:</p>

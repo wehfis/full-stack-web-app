@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   appserver.webapi:
+    container_name: AppServer.WebApi
     build:
       labels:
         com.microsoft.created-by: "visual-studio"

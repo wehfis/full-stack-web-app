@@ -4,56 +4,32 @@ services:
     build:
       context: C:\Users\wehfi\OneDrive\Desktop\прогр та підтр вебзаст\full-stack-web-app\server
       dockerfile: AppServer.WebApi/Dockerfile
-    container_name: dot-net-app
-    depends_on:
-      appserverdb:
-        condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: https://+:443;http://+:80
-      DB_HOST: appserverdb
-      DB_NAME: AppServerDb
-      MSSQL_SA_PASSWORD: superStrongPassword123!?!
     image: appserverwebapi
     networks:
-      dotnetapp: null
+      default: null
     ports:
-    - mode: ingress
-      target: 80
-      protocol: tcp
-    - mode: ingress
-      target: 80
-      published: "8001"
-      protocol: tcp
-    - mode: ingress
-      target: 443
-      protocol: tcp
+      - mode: ingress
+        target: 80
+        protocol: tcp
+      - mode: ingress
+        target: 443
+        protocol: tcp
     volumes:
-    - type: bind
-      source: C:\Users\wehfi\AppData\Roaming/Microsoft/UserSecrets
-      target: /root/.microsoft/usersecrets
-      read_only: true
-      bind:
-        create_host_path: true
-    - type: bind
-      source: C:\Users\wehfi\AppData\Roaming/ASP.NET/Https
-      target: /root/.aspnet/https
-      read_only: true
-      bind:
-        create_host_path: true
-  appserverdb:
-    container_name: app-db
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: superStrongPassword123!?!
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    networks:
-      dotnetapp: null
-    ports:
-    - mode: ingress
-      target: 1433
-      published: "8002"
-      protocol: tcp
+      - type: bind
+        source: C:\Users\wehfi\AppData\Roaming/Microsoft/UserSecrets
+        target: /root/.microsoft/usersecrets
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\wehfi\AppData\Roaming/ASP.NET/Https
+        target: /root/.aspnet/https
+        read_only: true
+        bind:
+          create_host_path: true
 networks:
-  dotnetapp:
-    name: dockercompose14334227860602748356_dotnetapp
+  default:
+    name: dockercompose14334227860602748356_default

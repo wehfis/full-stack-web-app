@@ -61,6 +61,7 @@ const HeavyTask = () => {
             const percentages = response.data["percentageDone"];
             setPercentageDone(percentages);
             if (percentages === 100) {
+              tokenStore.clearTask();
               setIsClicked(false);
               setPercentageDone(0);
               message.success('Task successfully finished', 5);
@@ -80,7 +81,11 @@ const HeavyTask = () => {
   useEffect(() => {
     let interval: any;
     preloadData();
-    if (isClicked) { interval = setInterval(getTaskStatus, 1000); }
+    if (tokenStore.task_id) { 
+      interval = setInterval(getTaskStatus, 1000); 
+      setTaskId(tokenStore.task_id);
+      setIsClicked(true);
+    }
 
     return () => {
       clearInterval(interval);
@@ -95,6 +100,7 @@ const HeavyTask = () => {
         ownerId: userId
       }
       setTaskId(newTask.id);
+      tokenStore.setTask(newTask.id);
       const axiosConfig = {
         method: 'post',
         url: `${taskURL}`,
@@ -129,6 +135,13 @@ const HeavyTask = () => {
     }
   }
 
+  const CancelTask = () => {
+    tokenStore.clearTask();
+    setIsClicked(false);
+    setPercentageDone(0);
+    message.success('Task successfully cancelled', 5);
+  }
+
   return (
     <>
       <div className='input-block'>
@@ -161,10 +174,15 @@ const HeavyTask = () => {
               </Button>
             }
             {isClicked &&
+              <>
               <Button type="primary" loading={isClicked}>
                 {/* {percentageDone == 100 setIsClicked(false)} */}
                 Calculation In Proccess the {percentageDone}% is done...
               </Button>
+              <Button type="primary" danger onClick={CancelTask}>
+                Cancel Task
+              </Button>
+              </>
             }
           </Form.Item>
         </Form>

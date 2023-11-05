@@ -4,6 +4,7 @@ import { isExpired, decodeToken } from "react-jwt";
 export default class TokenStore {
   token = '';
   email = '';
+  task_id = '';
 
   constructor() {
     this.loadToken();
@@ -17,6 +18,14 @@ export default class TokenStore {
   }
   isValid() {
     return !isExpired(this.token);
+  }
+  setTask(task_id: string) {
+    this.task_id = task_id;
+    localStorage.setItem('task_id', task_id);
+  }
+  clearTask() {
+    this.task_id = '';
+    localStorage.removeItem('task_id');
   }
 
   setToken(token: string, email:string) {

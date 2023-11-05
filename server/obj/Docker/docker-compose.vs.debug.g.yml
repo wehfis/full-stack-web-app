@@ -3,6 +3,7 @@ version: '3.4'
 services:
   appserver.webapi:
     image: appserverwebapi:dev
+    container_name: AppServer.WebApi
     build:
       target: base
       labels:
